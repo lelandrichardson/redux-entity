@@ -1,0 +1,73 @@
+{
+  "name": "redux-entity",
+  "version": "0.0.1",
+  "description": "An abstraction layer around handling normalized entity storage and data fetching with redux",
+  "main": "build/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "prepublish": "npm run clean && npm run build",
+    "preversion": "npm run clean && npm run check",
+    "postversion": "git push && git push --tags && npm run clean",
+    "pretest": "npm run lint",
+    "version": "npm run build",
+    "clean": "rimraf build",
+    "lint": "eslint src test",
+    "flow": "flow check",
+    "check": "npm run lint && npm run test:only",
+    "build": "babel src --out-dir build",
+    "test": "npm run test:only",
+    "test:only": "mocha --recursive test --reporter dot",
+    "test:single": "mocha --watch --reporter dot",
+    "test:watch": "mocha --recursive test --watch --reporter dot",
+    "travis": "babel-node ./node_modules/.bin/istanbul cover --report html _mocha -- test --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lelandrichardson/redux-entity.git"
+  },
+  "keywords": [
+    "redux",
+    "entity",
+    "normalizr",
+    "react",
+    "flux",
+    "model"
+  ],
+  "author": "Leland Richardson <leland.m.richardson@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lelandrichardson/redux-entity/issues"
+  },
+  "homepage": "https://github.com/lelandrichardson/redux-entity#readme",
+  "dependencies": {
+    "immutable": "^3.8.1",
+    "lodash": "^4.15.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.11.4",
+    "babel-core": "^6.13.2",
+    "babel-eslint": "^6.1.2",
+    "babel-plugin-transform-class-properties": "^6.11.5",
+    "babel-plugin-transform-flow-strip-types": "^6.8.0",
+    "babel-plugin-transform-object-rest-spread": "^6.8.0",
+    "babel-preset-airbnb": "^2.0.0",
+    "babel-register": "^6.11.6",
+    "chai": "^3.5.0",
+    "coveralls": "^2.11.12",
+    "eslint": "^3.2.2",
+    "eslint-config-airbnb": "^10.0.0",
+    "eslint-plugin-flowtype": "^2.6.4",
+    "eslint-plugin-import": "^1.12.0",
+    "eslint-plugin-jsx-a11y": "^2.0.1",
+    "eslint-plugin-react": "^6.0.0",
+    "flow-bin": "^0.30.0",
+    "gitbook-cli": "^1.0.1",
+    "iflow-lodash": "^1.1.23",
+    "istanbul": "^1.0.0-alpha.2",
+    "mocha": "^3.0.1",
+    "rimraf": "^2.5.4",
+    "sinon": "^1.17.5"
+  }
+}

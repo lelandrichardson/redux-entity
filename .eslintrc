@@ -1,0 +1,16 @@
+{
+  "parser": "babel-eslint",
+  "extends": "airbnb",
+  "root": true,
+  "env": {
+    "node": true,
+    "mocha": true
+  },
+  "rules": {
+    "new-cap": 0,
+    "import/prefer-default-export": 0,
+  },
+  "plugins": [
+    "flowtype"
+  ]
+}
