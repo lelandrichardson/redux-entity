@@ -3,7 +3,7 @@
 
 ## Usage
 
-```
+```js
 // appSchema.js
 import {
   Schema,
@@ -31,7 +31,7 @@ Reservation.define({
 
 ```
 
-```
+```js
 // reducers/entites.js
 
 import { EntityStore } from 'redux-entity';
@@ -82,7 +82,7 @@ export default function reducer(state = initialState, action) {
 
 ```
 
-```
+```js
 // components/ListingContainer.js
 
 import { connect } from 'react-redux';
