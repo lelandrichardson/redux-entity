@@ -1,5 +1,25 @@
 # redux-entity
 
+## Features
+
+I'm planning on adding a few things to this library to start, and see where needs develop in an actual application.
+
+The features currently planned are:
+
+- [x] Normalized Data Storage (ie, one source of truth)
+- [x] Optimistic Updates
+- [ ] Asyncronous Validation + Form State
+- [ ] Offline first strategies (persisting state)
+- [ ] System for making user-land plugins
+- [ ] Add propType validators to `Schema` objects
+- [ ] Allow `Schema` to specify base type: `Object | Map | Record`
+- [ ] Move visiting logic to the `Schema` base class
+- [ ] Basic Query plugins
+    - [ ] `SimpleList`
+    - [ ] `PagedList`
+    - [ ] `FilteredList`
+    - [ ] `FilteredPagedList`
+
 
 ## Usage
 
