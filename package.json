@@ -21,7 +21,8 @@
     "test:only": "mocha --recursive test --reporter dot",
     "test:single": "mocha --watch --reporter dot",
     "test:watch": "mocha --recursive test --watch --reporter dot",
-    "travis": "babel-node ./node_modules/.bin/istanbul cover --report html _mocha -- test --recursive"
+    "test:travis": "babel-node ./node_modules/.bin/istanbul cover --report html _mocha -- test --recursive",
+    "travis": "npm run -s lint && npm run -s flow && npm run -s test:travis"
   },
   "repository": {
     "type": "git",
