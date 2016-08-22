@@ -1,12 +1,16 @@
+/* eslint global-require: 0 */
 const {
   Schema,
   arrayOf,
   valuesOf,
 } = require('./normalize');
-const EntityStore = require('./EntityStore');
 
 module.exports = {
-  EntityStore,
+  EntityStore: require('./EntityStore'),
+  PagedFilteredList: require('./PagedFilteredList'),
+  FilteredList: require('./FilteredList'),
+  Resource: require('./Resource'),
+  ResourceStore: require('./ResourceStore'),
   Schema,
   arrayOf,
   valuesOf,

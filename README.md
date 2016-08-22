@@ -25,16 +25,16 @@ The features currently planned are:
 - [x] Optimistic Updates
 - [ ] Asynchronous Validation + Form State
 - [ ] Offline first strategies (persisting state)
-- [ ] System for making user-land plugins
+- [x] System for making user-land plugins
 - [ ] Add propType validators to `Schema` objects
 - [ ] Allow `Schema` to specify base type: `Object | Map | Record`
 - [ ] Move visiting logic to the `Schema` base class
 - [ ] Take advantage of `reselect`
-- [ ] Basic Query plugins
+- [ ] Basic Resource plugins
     - [ ] `SimpleList`
     - [ ] `PagedList`
-    - [ ] `FilteredList`
-    - [ ] `FilteredPagedList`
+    - [x] `FilteredList`
+    - [x] `FilteredPagedList`
 
 
 ## Usage
@@ -49,11 +49,13 @@ schema is inspired from the [normalizr](https://github.com/paularmstrong/normali
 import {
   Schema,
   arrayOf,
+  PagedFilteredList,
 } from 'redux-entity';
 
 export const User = new Schema('users');
 export const Listing = new Schema('listings');
 export const Reservation = new Schema('reservations');
+export const SearchResults = new PagedFilteredList('searchResults', Listing);
 
 Listing.define({
   host: User,
@@ -85,13 +87,16 @@ that are provided.
 // reducers/entites.js
 
 import { EntityStore } from 'redux-entity';
-import { User, Listing, Reservation } from '../appSchema';
+import { User, Listing, Reservation, SearchResults } from '../appSchema';
 
 const initialState = EntityStore.create({
   entities: [
     Listing,
     User,
     Reservation,
+  ],
+  resources: [
+    SearchResults,
   ],
 });
 
@@ -124,6 +129,15 @@ export default function reducer(state = initialState, action) {
       return state
         .removeOptimisticUpdate(action.requestId)
         .update(Listing, payload);
+        
+    case SEARCH_FETCH:
+      return state.for(SearchResults, sr => sr
+        .setIsPageLoading(payload.filter, payload.page, true));
+
+    case SEARCH_FETCH_SUCCESS:
+      return state.for(SearchResults, sr => sr
+        .setIsPageLoading(payload.filter, payload.page, true)
+        .setPage(payload.filter, payload.page, payload.results));
 
     default: 
       return state;
@@ -149,6 +163,68 @@ function mapStateToProps({ entities }, props) {
 }
 
 export default connect(mapStateToProps)(ListingComponent);
+```
+
+```js
+// components/Search.js
+
+import { connect } from 'react-redux';
+import { SearchResults } from '../appSchema';
+import SearchComponent from './SearchComponent';
+
+function mapStateToProps({ entities }, props) {
+  const searchResults = entities.get(SearchResults);
+  return {
+    loading: searchResults.getIsLoading(props.filter, props.page),
+    results: searchResults.getPage(props.filter, props.page),
+  };
+}
+
+export default connect(mapStateToProps)(SearchComponent);
+```
+
+
+### A note on "Resources"
+
+Storing entites in a normalized fashion is only half of the battle. And, quite frankly, it's the simpler
+half. Most of a real app is a set of "queries" or "resources" that are slices of the global state atom. You
+usually want to look at state through some sort of lens that makes it useful to the user. You should view `Resource`
+classes as the way to do that.
+
+Since they are so important, redux entity provides a way for you to provide your own resource definitions for when
+the built in ones don't suit your needs...
+
+Below is how you would create a new resource class:
+
+```js
+// extensions/MyCustomResource.js
+
+import { 
+  Resource, 
+  ResourceStore, 
+  EntityStore, 
+  normalize,
+  Schema,
+} from 'redux-entity';
+
+class MyCustomResourceStore<T> extends ResourceStore<T> {
+  /*
+    Here is where you would want to put custom prototype methods that
+    return useful information about your resource from the global state
+    atom (accessible from `this.state`, or as "fluent" prototype methods
+    that return a new global state atom through the usage of the
+    `this.fluent(...)` prototype method defined in the `ResourceStore`
+    base class.
+  */
+}
+
+class MyCustomResource<T> extends Resource<T, MyCustomResourceStore<T>> {
+  constructor(key: string, itemSchema: Schema<T>) {
+    super(key, itemSchema, MyCustomResourceStore);
+  }
+}
+
+module.exports = MyCustomResource;
 ```
 
 

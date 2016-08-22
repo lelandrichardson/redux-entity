@@ -1,8 +1,7 @@
 [ignore]
-<PROJECT_ROOT>/src/BoundEntityStore.js
-<PROJECT_ROOT>/src/Queries.js
 <PROJECT_ROOT>/test/.*
 <PROJECT_ROOT>/build/.*
+<PROJECT_ROOT>/coverage/.*
 <PROJECT_ROOT>/node_modules/.*
 
 [libs]
