@@ -121,7 +121,7 @@ export default function reducer(state = initialState, action) {
     
     case UPDATE_LISTING_TITLE:
       return state
-        .optimisticUpdate(Listing, payload.id, action.requestId, {
+        .addOptimisticUpdate(Listing, payload.id, action.requestId, {
           title: payload.title,
         });
 
