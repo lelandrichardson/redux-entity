@@ -14,6 +14,11 @@ class ResourceStore<T> {
     this.state = state;
   }
 
+  /* eslint no-unused-vars:0 */
+  resolve(variables: any): any {
+    // TODO(lmr): throw error?
+  }
+
   fluent(stateMapper: Identity<EntityStoreState>): this {
     const C = this.constructor;
     return new C(

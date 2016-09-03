@@ -18,6 +18,7 @@ export type NormalizeOutput = {
 const EntitySchema = require('./EntitySchema');
 const IterableSchema = require('./IterableSchema');
 const UnionSchema = require('./UnionSchema');
+const Reference = require('./Reference');
 // $FlowIgnore: suppressing module not found error
 const isEqual = require('lodash/isEqual');
 // $FlowIgnore: suppressing module not found error
@@ -125,7 +126,7 @@ function visitEntity<T: any>(
   const normalized = visitObject(entity, entitySchema.nestedSchema, bag, options, entitySchema);
   mergeIntoEntity(stored, normalized, entityKey);
 
-  return id;
+  return new Reference(entitySchema, id);
 }
 
 function visit(obj: any, schema: SchemaValue, bag: Object, options: NormalizeOptions) {

@@ -6,7 +6,7 @@ const { fromJS, List } = require('immutable');
 const ResourceStore = require('./ResourceStore');
 const Resource = require('./Resource');
 const EntityStore = require('./EntityStore');
-const { normalize } = require('./normalize');
+const { arrayOf, normalize } = require('./normalize');
 
 const KEY = (x: Filter): Object => fromJS(x);
 
@@ -19,8 +19,8 @@ const LOADING = 'loading';
    [filterKey]: {
      loading: true,
      items: []
-   }
- }
+   },
+ },
  */
 class FilteredListStore<T> extends ResourceStore<T> {
   isLoading(filter: Filter): boolean {
@@ -35,19 +35,24 @@ class FilteredListStore<T> extends ResourceStore<T> {
 
   getItems(filter: Filter, offset: number, limit: number): List {
     const store = new EntityStore(this.state);
-    const itemSchema = this.schema.getItemSchema();
-    return this.state.getIn([RESOURCES, this.schema.getKey(), KEY(filter), ITEMS])
-      .slice(offset, offset + limit)
-      .map(id => store.get(itemSchema, id));
+    let items = this.state.getIn([RESOURCES, this.schema.getKey(), KEY(filter), ITEMS]);
+    if (offset != null && limit != null) {
+      items = items.slice(offset, offset + limit);
+    }
+    return items.map(ref => store.get(ref.schema, ref.id)).toArray();
   }
 
   setItems(filter: Filter, items: any): FilteredListStore<T> {
-    const { result, entities } = normalize(items, this.schema);
+    const { result, entities } = normalize(items, arrayOf(this.schema.itemSchema));
     let store = new EntityStore(this.state);
     store = store.updateNormalized(entities);
-    return new FilteredListStore(store.state).fluent(
+    return new FilteredListStore(this.schema, store.state).fluent(
       state => state.setIn([RESOURCES, this.schema.getKey(), KEY(filter), ITEMS], List(result))
     );
+  }
+
+  resolve(variables: any): any {
+    return this.state.getIn([RESOURCES, this.schema.getKey(), KEY(variables.filter)]);
   }
 }
 

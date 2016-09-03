@@ -4,6 +4,10 @@ const isEqual = require('lodash/isEqual');
 const isObject = require('lodash/isObject');
 const map = require('lodash/map');
 const merge = require('lodash/merge');
+const Reference = require('../src/Reference');
+
+
+const REF = (schema, id) => new Reference(schema, id);
 
 const { normalize, Schema, arrayOf, valuesOf, unionOf } = require('../src/normalize');
 
@@ -68,7 +72,7 @@ describe('normalize', function () {
     article.getKey().should.eql('articles');
 
     normalize(input, article).should.eql({
-      result: 1,
+      result: REF(article, 1),
       entities: {
         articles: {
           1: {
@@ -93,7 +97,7 @@ describe('normalize', function () {
     Object.freeze(input);
 
     normalize(input, article).should.eql({
-      result: 1,
+      result: REF(article, 1),
       entities: {
         articles: {
           1: {
@@ -119,7 +123,7 @@ describe('normalize', function () {
     normalize({ id: 2, title: 'foo' }, article);
 
     normalize(input, article).should.eql({
-      result: 1,
+      result: REF(article, 1),
       entities: {
         articles: {
           1: {
@@ -160,14 +164,14 @@ describe('normalize', function () {
     };
 
     normalize(input, article, options).should.eql({
-      result: 1,
+      result: REF(article, 1),
       entities: {
         articles: {
           1: {
             id: 1,
             title: 'Some Article',
             isFavorite: false,
-            type: 1
+            type: REF(type, 1)
           }
         },
         types: {
@@ -223,7 +227,7 @@ describe('normalize', function () {
           '123': {
             id: '123',
             title: 'My article',
-            author: '321',
+            author: REF(author, '321'),
             media: [
               {
                 id: '1345',
@@ -240,7 +244,7 @@ describe('normalize', function () {
           }
         }
       },
-      result: '123'
+      result: REF(article, '123')
     });
   });
 
@@ -284,7 +288,7 @@ describe('normalize', function () {
           '123': {
             id: '123',
             title: 'My article',
-            authors: ['321', '678']
+            authors: [REF(author, '321'), REF(author, '678')]
           }
         },
         authors: {
@@ -298,7 +302,7 @@ describe('normalize', function () {
           }
         }
       },
-      result: '123'
+      result: REF(article, '123')
     });
   });
 
@@ -323,7 +327,7 @@ describe('normalize', function () {
           '123': { id: '123', type: 'hardshell', filling: 'veggie' }
         }
       },
-      result: '123'
+      result: REF(taco, '123')
     });
   });
 
@@ -377,7 +381,7 @@ describe('normalize', function () {
 
     normalize(input, { group: group }).should.eql({
       result: {
-        group: 1
+        group: REF(group, 1),
       },
       entities: {
         groups: {
@@ -385,19 +389,19 @@ describe('normalize', function () {
             id: 1,
             name: 'facebook',
             members: [{
-              id: 2,
+              id: REF(group, 2),
               schema: 'groups'
             }, {
-              id: 3,
+              id: REF(user, 3),
               schema: 'users'
             }],
             owner: {
-              id: 4,
+              id: REF(user, 4),
               schema: 'users'
             },
             relations: {
               friend: {
-                id: 5,
+                id: REF(user, 5),
                 schema: 'users'
               }
             },
@@ -466,13 +470,13 @@ describe('normalize', function () {
     Object.freeze(input);
 
     normalize(input, article).should.eql({
-      result: 1,
+      result: REF(article, 1),
       entities: {
         articles: {
           1: {
             id: 1,
             title: 'Some Article',
-            collection_ids: [1, 7]
+            collection_ids: [REF(collection, 1), REF(collection, 7)]
           },
         },
         collections: {
@@ -558,8 +562,8 @@ describe('normalize', function () {
 
     normalize(input, valuesOf(author), options).should.eql({
       result: {
-        author: 1,
-        reviewer: 1
+        author: REF(author, 1),
+        reviewer: REF(author, 1),
       },
       entities: {
         authors: {
@@ -593,7 +597,7 @@ describe('normalize', function () {
     article.getKey().should.eql('articles');
 
     normalize(input, article).should.eql({
-      result: 'some-article',
+      result: REF(article, 'some-article'),
       entities: {
         articles: {
           'some-article': {
@@ -632,7 +636,7 @@ describe('normalize', function () {
     Object.freeze(input);
 
     normalize(input, article).should.eql({
-      result: 'some-article-1983-3-12',
+      result: REF(article, 'some-article-1983-3-12'),
       entities: {
         articles: {
           'some-article-1983-3-12': {
@@ -665,7 +669,7 @@ describe('normalize', function () {
     Object.freeze(input);
 
     normalize(input, arrayOf(article)).should.eql({
-      result: [1, 2],
+      result: [REF(article, 1), REF(article, 2)],
       entities: {
         articles: {
           1: {
@@ -696,7 +700,7 @@ describe('normalize', function () {
     Object.freeze(input);
 
     normalize(input, arrayOf(article)).should.eql({
-      result: [1, 2],
+      result: [REF(article, 1), REF(article, 2)],
       entities: {
         articles: {
           1: {
@@ -734,8 +738,8 @@ describe('normalize', function () {
 
     normalize(input, arrayOf(articleOrTutorial, { schemaAttribute: 'type' })).should.eql({
       result: [
-        {id: 1, schema: 'articles'},
-        {id: 1, schema: 'tutorials'}
+        { id: REF(article, 1), schema: 'articles'},
+        { id: REF(tutorial, 1), schema: 'tutorials'}
       ],
       entities: {
         articles: {
@@ -780,8 +784,8 @@ describe('normalize', function () {
 
     normalize(input, arrayOf(articleOrTutorial, { schemaAttribute: guessSchema })).should.eql({
       result: [
-        { id: 1, schema: 'articles' },
-        { id: 1, schema: 'tutorials' }
+        { id: REF(article, 1), schema: 'articles' },
+        { id: REF(tutorial, 1), schema: 'tutorials' }
       ],
       entities: {
         articles: {
@@ -821,8 +825,8 @@ describe('normalize', function () {
 
     normalize(input, valuesOf(article)).should.eql({
       result: {
-        one: 1,
-        two: 2
+        one: REF(article, 1),
+        two: REF(article, 2),
       },
       entities: {
         articles: {
@@ -867,9 +871,9 @@ describe('normalize', function () {
 
     normalize(input, valuesOf(articleOrTutorial, { schemaAttribute: 'type' })).should.eql({
       result: {
-        one: {id: 1, schema: 'articles'},
-        two: {id: 2, schema: 'articles'},
-        three: {id: 1, schema: 'tutorials'}
+        one: { id: REF(article, 1), schema: 'articles'},
+        two: { id: REF(article, 2), schema: 'articles'},
+        three: { id: REF(tutorial, 1), schema: 'tutorials'}
       },
       entities: {
         articles: {
@@ -927,9 +931,9 @@ describe('normalize', function () {
 
     normalize(input, valuesOf(articleOrTutorial, { schemaAttribute: guessSchema })).should.eql({
       result: {
-        one: {id: 1, schema: 'articles'},
-        two: {id: 2, schema: 'articles'},
-        three: {id: 1, schema: 'tutorials'}
+        one: { id: REF(article, 1), schema: 'articles'},
+        two: { id: REF(article, 2), schema: 'articles'},
+        three: { id: REF(tutorial, 1), schema: 'tutorials'}
       },
       entities: {
         articles: {
@@ -976,13 +980,13 @@ describe('normalize', function () {
     Object.freeze(input);
 
     normalize(input, article).should.eql({
-      result: 1,
+      result: REF(article, 1),
       entities: {
         articles: {
           1: {
             id: 1,
             title: 'Some Article',
-            author: 3
+            author: REF(user, 3),
           }
         },
         users: {
@@ -1060,38 +1064,38 @@ describe('normalize', function () {
 
     normalize(input, feedSchema).should.eql({
       result: {
-        feed: [1, 2]
+        feed: [REF(article, 1), REF(article, 2)]
       },
       entities: {
         articles: {
           1: {
             id: 1,
             title: 'Some Article',
-            author: 3,
-            collections: [1, 7]
+            author: REF(user, 3),
+            collections: [REF(collection, 1), REF(collection, 7)]
           },
           2: {
             id: 2,
             title: 'Other Article',
-            author: 2,
-            collections: [2]
+            author: REF(user, 2),
+            collections: [REF(collection, 2)]
           }
         },
         collections: {
           1: {
             id: 1,
             title: 'Awesome Writing',
-            curator: 4
+            curator: REF(user, 4)
           },
           2: {
             id: 2,
             title: 'Neverhood',
-            curator: 120
+            curator: REF(user, 120)
           },
           7: {
             id: 7,
             title: 'Even Awesomer',
-            curator: 100
+            curator: REF(user, 100)
           }
         },
         users: {
@@ -1195,8 +1199,8 @@ describe('normalize', function () {
     normalize(input, feedSchema).should.eql({
       result: {
         feed: [
-          { id: 1, schema: 'articles' },
-          { id: 1, schema: 'tutorials' }
+          { id: REF(article, 1), schema: 'articles' },
+          { id: REF(tutorial, 1), schema: 'tutorials' }
         ]
       },
       entities: {
@@ -1205,8 +1209,8 @@ describe('normalize', function () {
             id: 1,
             type: 'articles',
             title: 'Some Article',
-            author: 3,
-            collections: [1, 7]
+            author: REF(user, 3),
+            collections: [REF(collection, 1), REF(collection, 7)]
           }
         },
         tutorials: {
@@ -1214,25 +1218,25 @@ describe('normalize', function () {
             id: 1,
             type: 'tutorials',
             title: 'Some Tutorial',
-            author: 2,
-            collections: [2]
+            author: REF(user, 2),
+            collections: [REF(collection, 2)]
           }
         },
         collections: {
           1: {
             id: 1,
             title: 'Awesome Writing',
-            curator: 4
+            curator: REF(user, 4)
           },
           2: {
             id: 2,
             title: 'Neverhood',
-            curator: 120
+            curator: REF(user, 120)
           },
           7: {
             id: 7,
             title: 'Even Awesomer',
-            curator: 100
+            curator: REF(user, 100)
           }
         },
         users: {
@@ -1324,9 +1328,9 @@ describe('normalize', function () {
 
     normalize(input, feedSchema).should.eql({
       result: {
-        feed: [1, 2, 3],
+        feed: [REF(article, 1), REF(article, 2), REF(article, 3)],
         suggestions: {
-          1: [2, 3]
+          1: [REF(article, 2), REF(article, 3)]
         }
       },
       entities: {
@@ -1335,15 +1339,15 @@ describe('normalize', function () {
             id: 1,
             title: 'Some Article',
             collaborators: {
-              authors: [3],
-              reviewers: [2]
+              authors: [REF(user, 3)],
+              reviewers: [REF(user, 2)]
             }
           },
           2: {
             id: 2,
             title: 'Other Article',
             collaborators: {
-              authors: [2]
+              authors: [REF(user, 2)]
             }
           },
           3: {
@@ -1427,9 +1431,9 @@ describe('normalize', function () {
 
     normalize(input, feedSchema).should.eql({
       result: {
-        feed: [1, 2, 3],
+        feed: [REF(article, 1), REF(article, 2), REF(article, 3)],
         suggestions: {
-          1: [2, 3]
+          1: [REF(article, 2), REF(article, 3)]
         }
       },
       entities: {
@@ -1438,15 +1442,15 @@ describe('normalize', function () {
             id: 1,
             title: 'Some Article',
             collaborators: {
-              author: { id: 3, schema: 'users' },
-              reviewer: { id: 2, schema: 'groups' }
+              author: { id: REF(user, 3), schema: 'users' },
+              reviewer: { id: REF(group, 2), schema: 'groups' }
             }
           },
           2: {
             id: 2,
             title: 'Other Article',
             collaborators: {
-              author: { id: 2, schema: 'users' }
+              author: { id: REF(user, 2), schema: 'users' }
             }
           },
           3: {
@@ -1541,38 +1545,38 @@ describe('normalize', function () {
 
     normalize(input, feedSchema).should.eql({
       result: {
-        feed: [1]
+        feed: [REF(article, 1)]
       },
       entities: {
         articles: {
           1: {
             id: 1,
             title: 'Some Article',
-            collections: [1, 7]
+            collections: [REF(collection, 1), REF(collection, 7)]
           }
         },
         collections: {
           1: {
             id: 1,
             title: 'Awesome Writing',
-            subscribers: [4, 100]
+            subscribers: [REF(user, 4), REF(user, 100)]
           },
           7: {
             id: 7,
             title: 'Even Awesomer',
-            subscribers: [100]
+            subscribers: [REF(user, 100)]
           }
         },
         users: {
           4: {
             id: 4,
             name: 'Andy Warhol',
-            articles: [1]
+            articles: [REF(article, 1)]
           },
           100: {
             id: 100,
             name: 'T.S. Eliot',
-            articles: [1]
+            articles: [REF(article, 1)]
           }
         }
       }
@@ -1603,18 +1607,18 @@ describe('normalize', function () {
     Object.freeze(input);
 
     normalize(input, user).should.eql({
-      result: 1,
+      result: REF(user, 1),
       entities: {
         users: {
           1: {
             id: 1,
             name: 'Andy Warhol',
-            parent: 7
+            parent: REF(user, 7),
           },
           7: {
             id: 7,
             name: 'Tom Dale',
-            parent: 4
+            parent: REF(user, 4),
           },
           4: {
             id: 4,
@@ -1670,7 +1674,7 @@ describe('normalize', function () {
     }];
 
     normalize(input, schema).should.eql({
-      result: [3, 3],
+      result: [REF(writer, 3), REF(writer, 3)],
       entities: {
         writers: {
           3: {
@@ -1678,7 +1682,7 @@ describe('normalize', function () {
             isBritish: true,
             name: 'Jo Rowling',
             bio: 'writer',
-            books: [1],
+            books: [REF(book, 1)],
             location: {
               x: 100,
               y: 200,
@@ -1739,13 +1743,13 @@ describe('normalize', function () {
     console.warn = mockWarn;
 
     normalize(input, schema).should.eql({
-      result: [3, 3],
+      result: [REF(writer, 3), REF(writer, 3)],
       entities: {
         writers: {
           3: {
             id: 3,
             name: 'Jo Rowling',
-            books: [1]
+            books: [REF(book, 1)]
           }
         },
         books: {
@@ -1773,7 +1777,7 @@ describe('normalize', function () {
     };
 
     normalize(input, schema).should.eql({
-      result: 'constructor',
+      result: REF(schema, 'constructor'),
       entities: {
         writers: {
           constructor: {
@@ -1834,7 +1838,7 @@ describe('normalize', function () {
 
     normalize(input, { group: group }).should.eql({
       result: {
-        group: 1
+        group: REF(group, 1),
       },
       entities: {
         groups: {
@@ -1842,19 +1846,19 @@ describe('normalize', function () {
             id: 1,
             name: 'facebook',
             members: [{
-              id: 2,
+              id: REF(group, 2),
               schema: 'groups'
             }, {
-              id: 3,
+              id: REF(user, 3),
               schema: 'users'
             }],
             owner: {
-              id: 4,
+              id: REF(user, 4),
               schema: 'users'
             },
             relations: {
               friend: {
-                id: 5,
+                id: REF(user, 5),
                 schema: 'users'
               }
             }

@@ -30,6 +30,7 @@ The features currently planned are:
 - [ ] Allow `Schema` to specify base type: `Object | Map | Record`
 - [ ] Move visiting logic to the `Schema` base class
 - [ ] Take advantage of `reselect`
+- [x] Use `graphql-anywhere` to read from the state atom
 - [ ] Basic Resource plugins
     - [ ] `SimpleList`
     - [ ] `PagedList`
@@ -181,6 +182,50 @@ function mapStateToProps({ entities }, props) {
 }
 
 export default connect(mapStateToProps)(SearchComponent);
+```
+
+Alternatively, `redux-entity` exposes a `connect` HOC similar to 
+`react-redux` that works directly with GraphQL queries (as opposed to 
+`mapStateToProps` functions) to the global state atom. This allows for you 
+to grab data for a component that traverses that state graph (which has been 
+normalized by `redux-entity`) without worrying at all about things such as 
+the optimistic updates, or referential consistency.
+
+```js
+// components/Search.js
+
+import { ql, connect } from 'redux-entity';
+import SearchComponent from './SearchComponent';
+
+export default connect(ql`{
+  searchResults(filter: $filter) {
+    totalCount
+    isLoading
+    listings {
+      id
+      title
+    }
+  }
+}`)(SearchComponent);
+```
+
+
+```js
+// components/Listing.js
+
+import { ql, connect } from 'redux-entity';
+import ListingComponent from './ListingComponent';
+
+export default connect(ql`{
+  listing(id: $id) {
+    id
+    title
+    host {
+      id
+      name
+    }
+  }
+}`)(ListingComponent);
 ```
 
 

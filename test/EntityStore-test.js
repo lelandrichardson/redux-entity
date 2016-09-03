@@ -1,5 +1,7 @@
 const { expect } = require('chai');
-const { Schema, arrayOf, EntityStore } = require('../src');
+const { Schema, arrayOf, EntityStore, Reference } = require('../src');
+
+const REF = (schema, id) => new Reference(schema, id);
 
 const User = new Schema('users', {
   id: user => user.id,
@@ -120,7 +122,7 @@ describe('EntityStore', () => {
       expect(store.get(Listing, 1)).to.eql({
         id: 1,
         foo: 'bar',
-        host: 2,
+        host: REF(User, 2),
       });
 
       expect(store.get(User, 2)).to.eql({

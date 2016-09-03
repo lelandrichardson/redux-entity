@@ -1,9 +1,10 @@
 /* eslint no-unused-vars: 0 */
 import type { SchemaValue, idType, Identity, Keyable } from './types';
 import type { NormalizeInput } from './normalize';
-import type Resource from './Resource';
 import type ResourceStore from './ResourceStore';
-import type EntitySchema from './EntitySchema';
+
+const EntitySchema = require('./EntitySchema');
+const Resource = require('./Resource');
 
 const { normalize } = require('./normalize');
 // $FlowIgnore: suppressing module not found error
@@ -24,6 +25,7 @@ const ENTITIES = 'entities';
 const RESOURCES = 'resources';
 const LOADING_STATES = 'loadingStates';
 const OPTIMISTIC_UPDATES = 'optimisticUpdates';
+const SCHEMA = 'schema';
 
 function mapByKey(arrayOfSchema: Keyable[], fn) {
   return arrayOfSchema.reduce((m, e) => {
@@ -43,11 +45,15 @@ function applyOptimisticUpdates<T>(entity: T, updates: ?OrderedMap): T {
 class EntityStore {
   static create(options): EntityStore {
     const { entities, resources } = options;
+
+    const schema = (entities || []).concat(resources || []);
+
     const initialState = fromJS({
       [ENTITIES]: mapByKey(entities, () => ({})),
       [RESOURCES]: mapByKey(resources || [], (e) => e.createInitialState()),
       [LOADING_STATES]: mapByKey(entities, () => ({})),
       [OPTIMISTIC_UPDATES]: mapByKey(entities, () => ({})),
+      [SCHEMA]: mapByKey(schema, s => s),
     });
     return new EntityStore(initialState);
   }
@@ -69,6 +75,14 @@ class EntityStore {
       this.getPessimistic(schema, id),
       this.state.getIn([OPTIMISTIC_UPDATES, schema.getKey(), Id(id)])
     );
+  }
+
+  getResource<T, S: ResourceStore<T>>(schema: Resource<T, S>): ResourceStore<T> {
+    return schema.createStoreFromState(this.state);
+  }
+
+  getSchema(key: string): SchemaValue {
+    return this.state.getIn([SCHEMA, key]);
   }
 
   has<T>(schema: EntitySchema<T>, id: idType): boolean {

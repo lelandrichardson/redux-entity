@@ -27,3 +27,4 @@ export type SchemaValue = EntitySchema<*> | IterableSchema | UnionSchema | Schem
 
 export type Keyable = EntitySchema<*> | Resource<*>;
 
+export type GraphQLQuery = Object;
