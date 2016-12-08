@@ -6,7 +6,7 @@ const { fromJS, List } = require('immutable');
 const ResourceStore = require('./ResourceStore');
 const Resource = require('./Resource');
 const EntityStore = require('./EntityStore');
-const { normalize } = require('./normalize');
+const { normalize, arrayOf } = require('./normalize');
 
 const KEY = (x: Filter): Object => fromJS(x);
 
@@ -46,14 +46,14 @@ class PagedFilteredListStore<T> extends ResourceStore<T> {
     const store = new EntityStore(this.state);
     const itemSchema = this.schema.getItemSchema();
     return this.state.getIn([RESOURCES, this.schema.getKey(), KEY(filter), PAGES, page], List())
-      .map(id => store.get(itemSchema, id));
+      .map(ref => store.get(itemSchema, ref.id)).toArray();
   }
 
   setPage(filter: Filter, page: number, items: any): PagedFilteredListStore<T> {
-    const { result, entities } = normalize(items, this.schema);
+    const { result, entities } = normalize(items, arrayOf(this.schema.itemSchema));
     let store = new EntityStore(this.state);
     store = store.updateNormalized(entities);
-    return new PagedFilteredListStore(store.state).fluent(
+    return new PagedFilteredListStore(this.schema, store.state).fluent(
       state => state.setIn([
         RESOURCES,
         this.schema.getKey(),
