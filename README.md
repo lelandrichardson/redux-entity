@@ -85,7 +85,7 @@ You will want to then create a reducer function and return a new `EntityStore` i
 that are provided.
 
 ```js
-// reducers/entites.js
+// reducers/entities.js
 
 import { EntityStore } from 'redux-entity';
 import { User, Listing, Reservation, SearchResults } from '../appSchema';
